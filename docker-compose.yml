@@ -1,0 +1,28 @@
+version: '2'
+services:
+  zookeeper:
+    image: zookeeper
+    ports:
+      - "2181:2181"
+
+  zookeeper_seeder:
+    image: zookeeper
+    depends_on:
+      - zookeeper
+    #
+    # The seeding should ensure that there is a specific zookeeper node for the application (/config/root/my-app)
+    # and a default node (/config/root/default). The key "someKey" should be present in both, while the key "otherKey"
+    # is only present in the default node.
+    #
+    command: >
+      sh -c "sleep 3 &&
+        zkCli.sh -server zookeeper:2181 create /config &&
+        zkCli.sh -server zookeeper:2181 create /config/root &&
+        zkCli.sh -server zookeeper:2181 create /config/root/my-app &&
+        zkCli.sh -server zookeeper:2181 create /config/root/my-app/someKey someValue &&
+        zkCli.sh -server zookeeper:2181 create /config/root/default &&
+        zkCli.sh -server zookeeper:2181 create /config/root/default/someKey someDefaultValue &&
+        zkCli.sh -server zookeeper:2181 create /config/root/default/otherKey otherDefaultValue"
+
+
+
